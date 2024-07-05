@@ -2,19 +2,15 @@ package main
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/devalexandre/langflowgo/langflowclient"
+	"log"
 )
 
 func main() {
 	flowIdOrName := "b87811d9-9974-4d11-bfab-4d4ff0b43160"
 	inputValue := "Qual o CNAE usado para pesca?"
 	stream := false
-	langflowClient := langflowclient.LangflowClient{
-		BaseURL: "http://127.0.0.1:7860",
-		APIKey:  "",
-	}
+	langflowClient := langflowclient.NewLangflowClient()
 	tweaks := langflowclient.Options{
 		"OpenAIEmbeddings-gMvoo": langflowclient.Options{},
 		"Qdrant-NRPl4":           langflowclient.Options{},
