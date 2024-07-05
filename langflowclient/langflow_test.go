@@ -8,7 +8,7 @@ import (
 )
 
 func TestLangflowClient_RunFlow(t *testing.T) {
-	flowIdOrName := "786fd3ec-b741-42ca-9c79-906edfe65851"
+	flowIdOrName := ""
 	inputValue := "what's Yamask attack?"
 	stream := false
 	langflowClient := langflowclient.NewLangflowClient()
@@ -62,7 +62,7 @@ func TestLangflowClient_CheckAPIStatus(t *testing.T) {
 
 func TestLangflowClient_CheckAPIKey(t *testing.T) {
 	client := langflowclient.NewLangflowClient(
-		langflowclient.WithAPIKey("sk-IwGpoQKAeVPbTgOSjrQ9Q37xUNwPMKTjS-5xMEgnTrk"),
+		langflowclient.WithAPIKey("your_api_key"),
 	)
 
 	res, err := client.CheckAPIKey()
