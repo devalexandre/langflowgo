@@ -71,7 +71,8 @@ type APIStatusResponse struct {
 }
 
 type APIKeyCheckResponse struct {
-	Detail string `json:"detail"`
+	HasApiKey bool `json:"has_api_key"`
+	IsValid   bool `json:"is_valid"`
 }
 
 type VersionResponse struct {

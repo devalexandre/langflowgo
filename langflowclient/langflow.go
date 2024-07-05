@@ -61,7 +61,7 @@ func (client *LangflowClient) post(endpoint string, body interface{}) ([]byte, e
 	}
 	req.Header.Set("Content-Type", "application/json")
 	if client.APIKey != "" {
-		req.Header.Set("Authorization", "Bearer "+client.APIKey)
+		req.Header.Set("x-api-key", client.APIKey)
 	}
 
 	resp, err := client.HttpClient.Do(req)
@@ -87,7 +87,7 @@ func (client *LangflowClient) get(endpoint string) ([]byte, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	if client.APIKey != "" {
-		req.Header.Set("Authorization", "Bearer "+client.APIKey)
+		req.Header.Set("x-api-key", client.APIKey)
 	}
 
 	resp, err := client.HttpClient.Do(req)
@@ -213,22 +213,6 @@ func (client *LangflowClient) GetVersion() (VersionResponse, error) {
 func (client *LangflowClient) GetAllFlows() (AllFlowsResponse, error) {
 	var result AllFlowsResponse
 	responseBytes, err := client.get("/api/v1/all")
-	if err != nil {
-		return result, err
-	}
-
-	err = json.Unmarshal(responseBytes, &result)
-	if err != nil {
-		return result, err
-	}
-
-	return result, nil
-}
-
-func (client *LangflowClient) GetBuildStatus(buildID string) (BuildStatusResponse, error) {
-	var result BuildStatusResponse
-	endpoint := fmt.Sprintf("/api/v1/build/%s/status", buildID)
-	responseBytes, err := client.get(endpoint)
 	if err != nil {
 		return result, err
 	}

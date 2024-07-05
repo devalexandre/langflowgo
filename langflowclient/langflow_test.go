@@ -8,7 +8,7 @@ import (
 )
 
 func TestLangflowClient_RunFlow(t *testing.T) {
-	flowIdOrName := "786fd3ec-b741-42ca-9c79-906edfe65851"
+	flowIdOrName := ""
 	inputValue := "what's Yamask attack?"
 	stream := false
 	langflowClient := langflowclient.NewLangflowClient()
@@ -61,9 +61,8 @@ func TestLangflowClient_CheckAPIStatus(t *testing.T) {
 }
 
 func TestLangflowClient_CheckAPIKey(t *testing.T) {
-	t.Skip("Skipping test that requires an API key")
 	client := langflowclient.NewLangflowClient(
-		langflowclient.WithAPIKey("sk-EBNSQPg0xB5v95dTijlYJhGuTVbStfEo1izrnAScSzs"),
+		langflowclient.WithAPIKey("your_api_key"),
 	)
 
 	res, err := client.CheckAPIKey()
@@ -71,10 +70,10 @@ func TestLangflowClient_CheckAPIKey(t *testing.T) {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 
-	expectedDetail := "An API key as query or header, or a JWT token must be passed"
-	if res.Detail != expectedDetail {
-		t.Errorf("Expected detail to be '%s', got '%s'", expectedDetail, res.Detail)
+	if !res.IsValid {
+		t.Errorf("Expected IsValid to be true, got %v", res.IsValid)
 	}
+
 }
 
 func TestLangflowClient_GetVersion(t *testing.T) {
@@ -100,20 +99,5 @@ func TestLangflowClient_GetAllFlows(t *testing.T) {
 
 	if res.Chains.LLMChain.Template.Type == "" {
 		t.Errorf("Expected at least one flow, got none")
-	}
-}
-
-func TestLangflowClient_GetBuildStatus(t *testing.T) {
-	t.Skip("Skipping test that requires a build ID")
-	client := langflowclient.NewLangflowClient()
-
-	buildID := "786fd3ec-b741-42ca-9c79-906edfe65851"
-	res, err := client.GetBuildStatus(buildID)
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
-	}
-
-	if res.Status == "" {
-		t.Errorf("Expected a status, got empty string")
 	}
 }
