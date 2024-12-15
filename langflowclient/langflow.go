@@ -104,8 +104,8 @@ func (client *LangflowClient) get(endpoint string) ([]byte, error) {
 }
 
 // initiateSession initiates a new session
-func (client *LangflowClient) initiateSession(flowId string, request RunFlowRequest) ([]byte, error) {
-	endpoint := fmt.Sprintf("/api/v1/run/%s?stream=%t", flowId, false)
+func (client *LangflowClient) initiateSession(flowId string, request RunFlowRequest, steam bool) ([]byte, error) {
+	endpoint := fmt.Sprintf("/api/v1/run/%s?stream=%t", flowId, steam)
 	return client.post(endpoint, request)
 }
 
@@ -132,13 +132,13 @@ func (client *LangflowClient) handleStream(streamUrl string, onUpdate func(map[s
 }
 
 // RunFlow runs a flow
-func (client *LangflowClient) RunFlow(flowIdOrName string, inputValue string, tweaks Options, stream bool, onUpdate func(map[string]interface{}), onClose func(string), onError func(error)) (ResponseRoot, error) {
+func (client *LangflowClient) RunFlow(flowIdOrName string, inputValue string, tweaks Options, stream bool, onError func(error)) (ResponseRoot, error) {
 	var initResponse ResponseRoot
 	request := RunFlowRequest{
 		InputValue: inputValue,
 		Tweaks:     tweaks,
 	}
-	responseBytes, err := client.initiateSession(flowIdOrName, request)
+	responseBytes, err := client.initiateSession(flowIdOrName, request, stream)
 	if err != nil {
 		onError(err)
 		return initResponse, err
@@ -150,16 +150,16 @@ func (client *LangflowClient) RunFlow(flowIdOrName string, inputValue string, tw
 	}
 
 	// Check if streaming is requested and process accordingly
-	if stream && len(initResponse.Outputs) > 0 {
-		for _, output := range initResponse.Outputs {
-			if output.Artifacts.Type == "stream" && output.Artifacts.StreamURL != "" {
-				fullStreamURL := client.BaseURL + output.Artifacts.StreamURL
-				fmt.Println("Streaming from:", fullStreamURL)
-				go client.handleStream(fullStreamURL, onUpdate, onClose, onError)
-				break
-			}
-		}
-	}
+	//if stream && len(initResponse.Outputs) > 0 {
+	//	for _, output := range initResponse.Outputs {
+	//		if output.Artifacts.Type == "stream" && output.Artifacts.StreamURL != "" {
+	//			fullStreamURL := client.BaseURL + output.Artifacts.StreamURL
+	//			fmt.Println("Streaming from:", fullStreamURL)
+	//			go client.handleStream(fullStreamURL, onUpdate, onClose, onError)
+	//			break
+	//		}
+	//	}
+	//}
 
 	return initResponse, nil
 }
@@ -210,17 +210,20 @@ func (client *LangflowClient) GetVersion() (VersionResponse, error) {
 	return result, nil
 }
 
-func (client *LangflowClient) GetAllFlows() (AllFlowsResponse, error) {
-	var result AllFlowsResponse
-	responseBytes, err := client.get("/api/v1/all")
-	if err != nil {
-		return result, err
+func GetLastMessage(response ResponseRoot) *Message {
+	var lastMessage *Message
+
+	for _, output := range response.Outputs {
+		if output.Results != nil { // Caso stream=false
+			lastMessage = &output.Results.Message
+		} else if len(output.Outputs) > 0 { // Caso stream=true
+			// Pegue o último elemento da lista "Outputs"
+			innerOutput := output.Outputs[len(output.Outputs)-1]
+			if innerOutput.Results != nil {
+				lastMessage = &innerOutput.Results.Message
+			}
+		}
 	}
 
-	err = json.Unmarshal(responseBytes, &result)
-	if err != nil {
-		return result, err
-	}
-
-	return result, nil
+	return lastMessage
 }
