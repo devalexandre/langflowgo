@@ -30,40 +30,38 @@ Here is a simple example of how to use the client to run a flow:
 package main
 
 import (
-    "fmt"
-    "log"
-
-    "github.com/devalexandre/langflowgo/langflowclient"
+	"fmt"
+	"github.com/devalexandre/langflowgo/langflowclient"
+	"log"
 )
 
 func main() {
-    client := langflowclient.LangflowClient{
-        BaseURL: "http://127.0.0.1:7860",
-        APIKey:  "your_api_key_here",
-    }
+	flowIdOrName := "cbed7afd-328d-4eb1-a79f-348852ab7159"
+	inputValue := "Boa tarde"
+	stream := true
+	langflowClient := langflowclient.NewLangflowClient(
+		langflowclient.WithHost("http://192.168.63.17:7860"),
+		langflowclient.WithAPIKey("sk-9l-7zxtsqDaFh0zQ3Ztvco7kz2DBHy8S4j-trF71m8Q"),
+	)
+	tweaks := langflowclient.Options{}
 
-    tweaks := langflowclient.Options{
-        "OpenAIEmbeddings-gMvoo": {},
-        // Add other tweaks as necessary
-    }
+	response, err := langflowClient.RunFlow(
+		flowIdOrName,
+		inputValue,
+		tweaks,
+		stream,
+		func(err error) {
+			fmt.Println("Stream Error:", err)
+		},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    response, err := client.RunFlow("flow_id_here", "User message", tweaks, false,
-        func(data map[string]interface{}) {
-            fmt.Println("Received:", data)
-        },
-        func(message string) {
-            fmt.Println("Stream Closed:", message)
-        },
-        func(err error) {
-            fmt.Println("Stream Error:", err)
-        },
-    )
+	msg := langflowclient.GetLastMessage(response)
 
-    if err != nil {
-        log.Fatal(err)
-    }
+	fmt.Println("Message:", msg.Text)
 
-    fmt.Println("Flow completed successfully:", response)
 }
 ```
 
